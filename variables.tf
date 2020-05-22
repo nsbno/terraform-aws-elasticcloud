@@ -18,14 +18,6 @@ variable username {
   description = "The kibana user username"
 }
 
-variable artifact_bucket {
-  description = "Bucket for build artifacts"
-}
-
-variable log_processor_s3_key {
-  description = "path to file for repository zip"
-}
-
 variable index {
   description = "The name of the index to which they"
   default     = "prm"
