@@ -1,6 +1,3 @@
-## Terraform AWS Template
+## Terraform AWS to Elastic Cloud Module
 
-This template is a starting point for creating terraform modules.
-
-Terraform modules should be in a state that they can be published to the Terraform Module Registry. Guidelines can be 
-found here https://www.terraform.io/docs/registry/modules/publish.html
+This module setup a lambda to transfer cloudwatch logs to elastic cloud
