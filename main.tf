@@ -36,6 +36,12 @@ resource "aws_lambda_function" "logs_to_elasticsearch" {
       index    = var.index
     }
   }
+  depends_on = [aws_cloudwatch_log_group.eclog]
+}
+
+resource "aws_cloudwatch_log_group" "eclog" {
+  name              = "/aws/lambda/${var.name_prefix}-LogsToElasticsearch"
+  retention_in_days = 3
 }
 
 resource "aws_iam_role" "logs_to_elasticsearch_role" {
