@@ -120,7 +120,6 @@ function buildAction(logEvent, payload, index) {
   return {
     index: {
       _index: index,
-      _type: index,
       _id: logEvent.id
     }
   }
