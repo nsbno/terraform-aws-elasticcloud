@@ -1,10 +1,5 @@
 data "aws_region" "current" {}
 
-resource "aws_kms_key" "elastic_cloud_password_key" {
-  description             = "Key used to encrypt and decrypt access keys for ElasticCloud"
-  deletion_window_in_days = 10
-}
-
 data "aws_ssm_parameter" "encpass" {
   name = "${var.name_prefix}-${var.encpassname}"
 }
