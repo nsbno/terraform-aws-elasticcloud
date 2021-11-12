@@ -15,7 +15,7 @@ resource "aws_lambda_function" "logs_to_elasticsearch" {
   function_name    = "${var.name_prefix}-LogsToElasticsearch"
   handler          = "Logforwarding.handler"
   role             = aws_iam_role.logs_to_elasticsearch_role.arn
-  runtime          = "nodejs10.x"
+  runtime          = "nodejs12.x"
   description      = "Sends logs from CloudWatch to AWS ElasticSearch Service"
   timeout          = "60"
   memory_size      = "128"
