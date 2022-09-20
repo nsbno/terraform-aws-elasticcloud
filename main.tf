@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 
 data "aws_ssm_parameter" "encpass" {
-  name = "${var.name_prefix}-${var.encpassname}"
+  name = var.encpassname
 }
 
 data "archive_file" "logforwardingelastic" {
