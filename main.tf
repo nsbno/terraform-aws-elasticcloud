@@ -20,7 +20,7 @@ resource "aws_lambda_function" "logs_to_elasticsearch" {
 
   environment {
     variables = {
-      ssm_name_password = var.ssm_name_password
+      ssm_password_name = var.ssm_password_name
       hostname          = var.hostname
       port              = var.port
       username          = var.username
@@ -68,6 +68,11 @@ data "aws_iam_policy_document" "logs_to_elasticsearch_policy" {
       "logs:PutLogEvents"
     ]
     resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = ["ssm:GetParameter"]
+    resources = [var.ssm_password_arn]
   }
 }
 

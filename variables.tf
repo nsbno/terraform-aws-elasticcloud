@@ -2,8 +2,12 @@ variable "name_prefix" {
   description = "A prefix used for naming resources."
 }
 
-variable ssm_name_password {
+variable ssm_password_name {
   description = "Kibana user password parameter name (value stored as SecureString)"
+}
+
+variable ssm_password_arn {
+  description = "Kibana user password parameter arn"
 }
 
 variable hostname {

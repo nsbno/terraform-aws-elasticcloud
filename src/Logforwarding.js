@@ -24,7 +24,7 @@
 'use strict'
 
 const ENV = process.env
-;['hostname', 'port', 'username', 'ssm_name_password'].forEach(key => {
+;['hostname', 'port', 'username', 'ssm_password_name'].forEach(key => {
   if (!ENV[key]) throw new Error(`Missing environment variable: ${key}`)
 })
 
@@ -286,7 +286,7 @@ function processEvent(event, context, callback) {
 function retrievePasswordAndProcessEvents(event, context, callback) {
   const ssmClient = new AWS.SSM()
   const params = {
-    Name: ENV.ssm_name_password,
+    Name: ENV.ssm_password_name,
     WithDecryption: true
   }
   ssmClient.getParameter(params, (err, data) => {
