@@ -1,9 +1,5 @@
 data "aws_region" "current" {}
 
-data "aws_ssm_parameter" "encpass" {
-  name = var.encpassname
-}
-
 data "archive_file" "logforwardingelastic" {
   output_path = "Logforwarding.zip"
   source_file = "${path.module}/src/Logforwarding.js"
@@ -24,11 +20,11 @@ resource "aws_lambda_function" "logs_to_elasticsearch" {
 
   environment {
     variables = {
-      encpass  = data.aws_ssm_parameter.encpass.value
-      hostname = var.hostname
-      port     = var.port
-      username = var.username
-      index    = var.index
+      ssm_password_name = var.ssm_password_name
+      hostname          = var.hostname
+      port              = var.port
+      username          = var.username
+      index             = var.index
     }
   }
   depends_on = [aws_cloudwatch_log_group.eclog]
@@ -62,10 +58,6 @@ data "aws_iam_policy_document" "logs_to_elasticsearch_role_policy" {
   }
 }
 
-data "aws_kms_key" "alias" {
-  key_id = "${var.kms_key_id}"
-}
-
 data "aws_iam_policy_document" "logs_to_elasticsearch_policy" {
   statement {
     effect = "Allow"
@@ -78,13 +70,9 @@ data "aws_iam_policy_document" "logs_to_elasticsearch_policy" {
     resources = ["*"]
   }
   statement {
-    actions = [
-      "kms:*",
-    ]
-
-    resources = [
-      data.aws_kms_key.alias.arn,
-    ]
+    effect = "Allow"
+    actions = ["ssm:GetParameter"]
+    resources = [var.ssm_password_arn]
   }
 }
 

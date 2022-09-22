@@ -24,7 +24,7 @@
 'use strict'
 
 const ENV = process.env
-;['hostname', 'port', 'username', 'encpass'].forEach(key => {
+;['hostname', 'port', 'username', 'ssm_password_name'].forEach(key => {
   if (!ENV[key]) throw new Error(`Missing environment variable: ${key}`)
 })
 
@@ -277,18 +277,21 @@ function processEvent(event, context, callback) {
 }
 
 /**
- * Decrypts the secrets and processes the triggered event
+ * Retrieves the secrets and processes the triggered event
  *
  * @param {*} event Event object
  * @param {*} context Context object (unused)
  * @param {Function} callback Callback function
  */
-function decryptAndProcess(event, context, callback) {
-  const kms = new AWS.KMS()
-  const enc = { CiphertextBlob: Buffer.from(ENV.encpass, 'base64') }
-  kms.decrypt(enc, (err, data) => {
+function retrievePasswordAndProcessEvents(event, context, callback) {
+  const ssmClient = new AWS.SSM()
+  const params = {
+    Name: ENV.ssm_password_name,
+    WithDecryption: true
+  }
+  ssmClient.getParameter(params, (err, data) => {
     if (err) return callback(err)
-    password = data.Plaintext.toString('ascii')
+    password = data.Parameter.Value
     processEvent(event, context, callback)
   })
 }
@@ -297,6 +300,6 @@ exports.handler = (event, context, callback) => {
   if (password) {
     processEvent(event, context, callback)
   } else {
-    decryptAndProcess(event, context, callback)
+    retrievePasswordAndProcessEvents(event, context, callback)
   }
 }

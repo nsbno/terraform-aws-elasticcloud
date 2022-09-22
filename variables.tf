@@ -2,8 +2,12 @@ variable "name_prefix" {
   description = "A prefix used for naming resources."
 }
 
-variable encpassname {
-  description = "Kibana user password parameter name"
+variable ssm_password_name {
+  description = "Kibana user password parameter name (value stored as SecureString)"
+}
+
+variable ssm_password_arn {
+  description = "Kibana user password parameter arn"
 }
 
 variable hostname {
@@ -28,9 +32,4 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-
-variable kms_key_id {
-  description = "Kms key used for encryption of elastic cloud ingestion user"
-}
-
 
