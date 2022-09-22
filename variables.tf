@@ -2,7 +2,7 @@ variable "name_prefix" {
   description = "A prefix used for naming resources."
 }
 
-variable encpassname {
+variable ssm_name_password {
   description = "Kibana user password parameter name"
 }
 

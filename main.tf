@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 
-data "aws_ssm_parameter" "encpass" {
-  name = var.encpassname
+data "aws_ssm_parameter" "password" {
+  name = var.ssm_name_password
 }
 
 data "archive_file" "logforwardingelastic" {
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "logs_to_elasticsearch" {
 
   environment {
     variables = {
-      encpass  = data.aws_ssm_parameter.encpass.value
+      password = data.aws_ssm_parameter.password.value
       hostname = var.hostname
       port     = var.port
       username = var.username
@@ -62,10 +62,6 @@ data "aws_iam_policy_document" "logs_to_elasticsearch_role_policy" {
   }
 }
 
-data "aws_kms_key" "alias" {
-  key_id = "${var.kms_key_id}"
-}
-
 data "aws_iam_policy_document" "logs_to_elasticsearch_policy" {
   statement {
     effect = "Allow"
@@ -76,15 +72,6 @@ data "aws_iam_policy_document" "logs_to_elasticsearch_policy" {
       "logs:PutLogEvents"
     ]
     resources = ["*"]
-  }
-  statement {
-    actions = [
-      "kms:*",
-    ]
-
-    resources = [
-      data.aws_kms_key.alias.arn,
-    ]
   }
 }
 

@@ -6,7 +6,7 @@
  * - hostname:    Hostname of the Elasticsearch cluster HTTPS endpoint.
  * - port:        Port number of the Elasticsearch cluster HTTPS endpoint.
  * - username:    Name of an ES user with create_index and write permissions.
- * - encpass:     AWS KMS encrypted password for the ES user.
+ * - password:    The password for the user above
  *
  * Optional environment variables:
  * - pipeline:    The Elasticsearch ingest pipeline to use.
@@ -24,7 +24,7 @@
 'use strict'
 
 const ENV = process.env
-;['hostname', 'port', 'username', 'encpass'].forEach(key => {
+;['hostname', 'port', 'username', 'password'].forEach(key => {
   if (!ENV[key]) throw new Error(`Missing environment variable: ${key}`)
 })
 
@@ -32,8 +32,6 @@ const PIPELINE_REGEXP = new RegExp(ENV.piperegexp || '.')
 const PIPELINE_FIELDS = ENV.pipefields
   ? ENV.pipefields.split(' ').map(f => f.split('='))
   : []
-
-let password
 
 // eslint-disable-next-line node/no-unpublished-require
 const AWS = require('aws-sdk')
@@ -236,7 +234,7 @@ function post(path, body, callback) {
     port: ENV.port,
     path: path,
     method: 'POST',
-    auth: `${ENV.username}:${password}`,
+    auth: `${ENV.username}:${ENV.password}`,
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(body)
@@ -276,27 +274,6 @@ function processEvent(event, context, callback) {
   })
 }
 
-/**
- * Decrypts the secrets and processes the triggered event
- *
- * @param {*} event Event object
- * @param {*} context Context object (unused)
- * @param {Function} callback Callback function
- */
-function decryptAndProcess(event, context, callback) {
-  const kms = new AWS.KMS()
-  const enc = { CiphertextBlob: Buffer.from(ENV.encpass, 'base64') }
-  kms.decrypt(enc, (err, data) => {
-    if (err) return callback(err)
-    password = data.Plaintext.toString('ascii')
-    processEvent(event, context, callback)
-  })
-}
-
 exports.handler = (event, context, callback) => {
-  if (password) {
     processEvent(event, context, callback)
-  } else {
-    decryptAndProcess(event, context, callback)
-  }
 }
