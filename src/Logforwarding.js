@@ -6,7 +6,7 @@
  * - hostname:    Hostname of the Elasticsearch cluster HTTPS endpoint.
  * - port:        Port number of the Elasticsearch cluster HTTPS endpoint.
  * - username:    Name of an ES user with create_index and write permissions.
- * - password:    The password for the user above
+ * - encpass:     AWS KMS encrypted password for the ES user.
  *
  * Optional environment variables:
  * - pipeline:    The Elasticsearch ingest pipeline to use.
@@ -24,7 +24,7 @@
 'use strict'
 
 const ENV = process.env
-;['hostname', 'port', 'username', 'password'].forEach(key => {
+;['hostname', 'port', 'username', 'ssm_name_password'].forEach(key => {
   if (!ENV[key]) throw new Error(`Missing environment variable: ${key}`)
 })
 
@@ -32,6 +32,8 @@ const PIPELINE_REGEXP = new RegExp(ENV.piperegexp || '.')
 const PIPELINE_FIELDS = ENV.pipefields
   ? ENV.pipefields.split(' ').map(f => f.split('='))
   : []
+
+let password
 
 // eslint-disable-next-line node/no-unpublished-require
 const AWS = require('aws-sdk')
@@ -234,7 +236,7 @@ function post(path, body, callback) {
     port: ENV.port,
     path: path,
     method: 'POST',
-    auth: `${ENV.username}:${ENV.password}`,
+    auth: `${ENV.username}:${password}`,
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(body)
@@ -274,6 +276,30 @@ function processEvent(event, context, callback) {
   })
 }
 
-exports.handler = (event, context, callback) => {
+/**
+ * Retrieves the secrets and processes the triggered event
+ *
+ * @param {*} event Event object
+ * @param {*} context Context object (unused)
+ * @param {Function} callback Callback function
+ */
+function retrievePasswordAndProcessEvents(event, context, callback) {
+  const ssmClient = new AWS.SSM()
+  const params = {
+    Name: ENV.ssm_name_password,
+    WithDecryption: true
+  }
+  ssmClient.getParameter(params, (err, data) => {
+    if (err) return callback(err)
+    password = data.Parameter.Value
     processEvent(event, context, callback)
+  })
+}
+
+exports.handler = (event, context, callback) => {
+  if (password) {
+    processEvent(event, context, callback)
+  } else {
+    retrievePasswordAndProcessEvents(event, context, callback)
+  }
 }

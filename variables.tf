@@ -3,7 +3,7 @@ variable "name_prefix" {
 }
 
 variable ssm_name_password {
-  description = "Kibana user password parameter name"
+  description = "Kibana user password parameter name (value stored as SecureString)"
 }
 
 variable hostname {

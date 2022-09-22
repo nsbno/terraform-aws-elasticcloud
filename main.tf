@@ -1,9 +1,5 @@
 data "aws_region" "current" {}
 
-data "aws_ssm_parameter" "password" {
-  name = var.ssm_name_password
-}
-
 data "archive_file" "logforwardingelastic" {
   output_path = "Logforwarding.zip"
   source_file = "${path.module}/src/Logforwarding.js"
@@ -24,11 +20,11 @@ resource "aws_lambda_function" "logs_to_elasticsearch" {
 
   environment {
     variables = {
-      password = data.aws_ssm_parameter.password.value
-      hostname = var.hostname
-      port     = var.port
-      username = var.username
-      index    = var.index
+      ssm_name_password = var.ssm_name_password
+      hostname          = var.hostname
+      port              = var.port
+      username          = var.username
+      index             = var.index
     }
   }
   depends_on = [aws_cloudwatch_log_group.eclog]
