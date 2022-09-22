@@ -29,8 +29,3 @@ variable "tags" {
   default     = {}
 }
 
-variable kms_key_id {
-  description = "Kms key used for encryption of elastic cloud ingestion user"
-}
-
-
