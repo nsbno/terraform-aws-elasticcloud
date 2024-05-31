@@ -27,9 +27,49 @@ variable index {
   default     = "prm"
 }
 
+variable enable_alarm {
+    description = "Enable alarm for failed invocations of the lambda function"
+    default     = false
+
+}
+
 variable "tags" {
   description = "A map of tags (key-value pairs) passed to resources."
   type        = map(string)
   default     = {}
+}
+
+
+/*
+ * == Alarm Configuration
+ */
+variable "alarm_sns_topic_arns" {
+  description = "Where to send Alarms and OKs"
+  type        = list(string)
+}
+
+variable "error_threshold" {
+  description = "Amount of times the lambda can fail before an alarm is triggered"
+  type        = number
+  default     = 10
+}
+
+variable "times_failed" {
+  description = "Amount of elapsed evaluation periods before an alarm is triggered"
+  type        = number
+  default     = 1
+}
+
+variable "treat_missing_data" {
+  description = "How this alarm is to handle missing data points"
+  type        = string
+  default     = "missing"
+}
+
+
+variable "period" {
+  description = "Period in seconds to check for the applied statistic"
+  type        = number
+  default     = 300
 }
 
