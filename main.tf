@@ -96,3 +96,21 @@ resource "aws_lambda_permission" "allow_invocation_from_logs" {
   principal = "logs.${data.aws_region.current.name}.amazonaws.com"
 }
 
+resource "aws_cloudwatch_metric_alarm" "elastic_index_is_full_alarm" {
+  count               = var.enable_alarm ? 1 : 0
+  alarm_name          = "${var.name_prefix}-logForwardLambdaFailedInvocations"
+  alarm_description   = "Alarm for failed invocations of the lambda function responsible for forwarding logs to elastic"
+  comparison_operator = "GreaterThanThreshold"
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  statistic           = "Sum"
+  dimensions = {
+    FunctionName = aws_lambda_function.logs_to_elasticsearch.function_name
+  }
+  period              = var.period
+  evaluation_periods  = var.times_failed
+  threshold           = var.error_threshold
+  treat_missing_data  = var.treat_missing_data
+  alarm_actions       = var.alarm_sns_topic_arns
+  ok_actions          = var.alarm_sns_topic_arns
+}
